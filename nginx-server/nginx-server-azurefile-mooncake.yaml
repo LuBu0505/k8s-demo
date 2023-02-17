@@ -2,7 +2,8 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   name: azurefile
-provisioner: kubernetes.io/azure-file
+#provisioner: kubernetes.io/azure-file ##need to change file.csi.azure.com to avoid the " StorageClass.storage.k8s.io "azurefile" is invalid: provisioner: Forbidden: updates to provisioner are forbidden." error.
+provisioner: file.csi.azure.com
 parameters:
   skuName: Standard_LRS
 ---
@@ -22,8 +23,13 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: nginx-server
+  labels:
+    app: nginx-server
 spec:
   replicas: 1
+  selector: # add the selector to avoid the "missing required field "selector" in io.k8s.api.apps.v1.DeploymentSpec"
+    matchLabels:
+      app: nginx-server
   strategy:
     rollingUpdate:
       maxSurge: 1
